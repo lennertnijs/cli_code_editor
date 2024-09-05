@@ -44,6 +44,7 @@ public interface IText {
 
     /**
      * Fetches and returns the length of the line at the given row index.
+     * Does NOT include any line breaks.
      * @param row The row index. 0 <= row < lineCount
      *
      * @return The line's length.
