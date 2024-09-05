@@ -1,12 +1,12 @@
 package com.vip;
 
-public final class FileText {
+public final class CharacterText implements IText{
 
-    public FileText(){
+    public CharacterText(){
 
     }
 
-    public FileText(String text){
+    public CharacterText(String text){
 
     }
 
@@ -52,5 +52,9 @@ public final class FileText {
 
     public boolean isEmpty(){
         return false;
+    }
+
+    public int countOccurrences(char[] sequence){
+        return 0;
     }
 }
