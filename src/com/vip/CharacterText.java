@@ -1,13 +1,27 @@
 package com.vip;
 
+import java.util.regex.Pattern;
+
 public final class CharacterText implements IText{
 
-    public CharacterText(){
 
+    private char[][] matrix;
+    private final Pattern regex = Pattern.compile("\\r?\\n|\\r");
+
+    public CharacterText(){
+        this.matrix = new char[0][0];
     }
 
     public CharacterText(String text){
 
+    }
+
+    private boolean isLineBreak(char c, char d){
+        return (c == '\r' && d == '\n') || isLineBreak(c);
+    }
+
+    private boolean isLineBreak(char c){
+        return c == '\n' || c == '\r';
     }
 
     public int getLength(){
