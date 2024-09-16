@@ -9,6 +9,7 @@ public final class ListText implements IText {
 
 
     private final List<StringBuilder> builders;
+    private int length = 0;
     private static final Pattern regex = Pattern.compile("\\r?\\n|\\r");
 
     public ListText(String s){
@@ -17,7 +18,9 @@ public final class ListText implements IText {
         String[] lines = regex.split(s);
         for(String str : lines){
             this.builders.add(new StringBuilder(str));
+            this.length += str.length() + 1;
         }
+        this.length = Math.max(length - 1, 0);
     }
 
     public ListText(char[] characters){
@@ -31,17 +34,12 @@ public final class ListText implements IText {
 
     @Override
     public boolean isEmpty() {
-        return builders.size() == 1 && builders.get(0).length() == 0;
+        return length == 0;
     }
 
     @Override
     public int getLength() {
-        int count = 0;
-        for(StringBuilder builder : builders){
-            count += builder.length() + 1;
-        }
-        count = Math.max(count-1, 0);
-        return count;
+        return length;
     }
 
     @Override
@@ -56,19 +54,6 @@ public final class ListText implements IText {
             matrix[i] = line;
         }
         return matrix;
-    }
-
-    @Override
-    public String getContentAsString(Linebreak linebreak) {
-        Objects.requireNonNull(linebreak, "Line break is null.");
-        StringBuilder concatBuilder = new StringBuilder();
-        for(int i = 0; i < builders.size(); i++){
-            concatBuilder.append(builders.get(i));
-            if(i != builders.size() - 1){
-                concatBuilder.append(linebreak.getValue());
-            }
-        }
-        return concatBuilder.toString();
     }
 
     @Override
@@ -90,14 +75,6 @@ public final class ListText implements IText {
             throw new IndexOutOfBoundsException("Row index is out of bounds.");
         }
         return builders.get(row).toString().toCharArray();
-    }
-
-    @Override
-    public String getLineAsString(int row) {
-        if(row < 0 || row >= builders.size()){
-            throw new IndexOutOfBoundsException("Row index is out of bounds.");
-        }
-        return builders.get(row).toString();
     }
 
     @Override
@@ -130,6 +107,7 @@ public final class ListText implements IText {
             throw new IndexOutOfBoundsException("Column index is out of bounds.");
         }
         builders.get(row).insert(column, character);
+        this.length++;
     }
 
     @Override
@@ -143,9 +121,10 @@ public final class ListText implements IText {
         if(column != builders.get(row).length()){
             char c = builders.get(row).charAt(column);
             builders.get(row).deleteCharAt(column);
+            this.length--;
             return c;
         }
-        if(row == builders.size() - 1){
+        if(row == builders.size() - 1 && column == builders.get(builders.size() - 1).length()){
             throw new IndexOutOfBoundsException("Cannot remove a line break from the final line.");
         }
         StringBuilder concatBuilder = new StringBuilder();
@@ -154,6 +133,7 @@ public final class ListText implements IText {
         builders.remove(row + 1);
         builders.remove(row);
         builders.add(row, concatBuilder);
+        this.length--;
         return '\n';
     }
 

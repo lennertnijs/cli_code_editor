@@ -1,5 +1,5 @@
 package com.vip;
-
+ // BUG -> REMOVING THE FINAL CHARACTER AND INSERTING LINE BREAKS
 public interface IText {
 
     /**
@@ -27,15 +27,6 @@ public interface IText {
     char[][] getContent();
 
     /**
-     * Fetches and returns the entire {@link IText} as a single string, using the given line break.
-     * @param linebreak The line break. Cannot be null.
-     *
-     * @return The entire text's contents as a single string.
-     * @throws NullPointerException If the linebreak is null.
-     */
-    String getContentAsString(Linebreak linebreak);
-
-    /**
      * Fetches and returns the amount of lines in the {@link IText}.
      *
      * @return The line count.
@@ -61,16 +52,6 @@ public interface IText {
      * @throws IndexOutOfBoundsException If row < 0 or row >= lineCount
      */
     char[] getLine(int row);
-
-    /**
-     * Fetches and returns the line at the given row index as a string.
-     * Does NOT include any line breaks.
-     * @param row The row index. 0 <= row < lineCount
-     *
-     * @return The line's contents as a single string.
-     * @throws IndexOutOfBoundsException If row < 0 or row >= lineCount
-     */
-    String getLineAsString(int row);
 
     /**
      * Fetches and returns the line's contents from the given row between the start (inclusive) and end (exclusive)
