@@ -1,5 +1,6 @@
 package com.vip;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -9,21 +10,27 @@ public final class CharacterText implements IText{
     private char[][] matrix;
     private final Pattern regex = Pattern.compile("\\r?\\n|\\r");
     private int length;
+    private final int[] offsets;
+    private int lastRow = -1;
+    private int lastCol = -1;
 
     public CharacterText(){
         this.matrix = new char[1][0];
+        this.offsets = new int[1];
     }
 
     public CharacterText(String text){
         String[] lines = regex.split(text);
         this.length = 0;
         this.matrix = new char[lines.length][];
+        this.offsets = new int[lines.length];
         for(int i = 0; i < lines.length; i++){
             this.matrix[i] = new char[lines[i].length()];
             for(int j = 0; j < lines[i].length(); j++){
                 this.matrix[i][j] = lines[i].charAt(j);
             }
             this.length += lines[i].length() + 1;
+            this.offsets[i] = lines[i].length();
         }
         this.length = Math.max(this.length - 1, 0);
     }
@@ -56,7 +63,24 @@ public final class CharacterText implements IText{
         if(row < 0 || row >= matrix.length){
             throw new IndexOutOfBoundsException("Row index is out of bounds.");
         }
-        return matrix[row];
+        if(row != lastRow){
+            return matrix[row];
+        }
+        int count = 0;
+        for(char c : matrix[row]){
+            if(c != '\u0000'){
+                count++;
+            }
+        }
+
+        char[] subArray = new char[count];
+        int i = 0;
+        for(char c : matrix[row]){
+            if(c != '\u0000'){
+                subArray[i++] = c;
+            }
+        }
+        return subArray;
     }
 
     public char[] getLineBetween(int row, int start, int end){
@@ -86,18 +110,31 @@ public final class CharacterText implements IText{
         if(col < 0 || col > matrix[row].length){
             throw new IndexOutOfBoundsException("Column index is out of bounds.");
         }
-        char[] oldLine = matrix[row];
-        char[] newLine = new char[oldLine.length + 1];
-        for(int i = 0; i < oldLine.length; i++){
-            if(i < col){
-                newLine[i] = oldLine[i];
-            }else{
-                newLine[i+1] = oldLine[i];
+        if(lastRow == row && lastCol == col - 1){
+            if (matrix[row][col] != '\u0000') {
+                addBufferSpaceToRow(row, col);
             }
+            matrix[row][col] = c;
+            this.length++;
+            this.lastCol++;
+            return;
         }
-        newLine[col] = c;
-        this.matrix[row] = newLine;
+        addBufferSpaceToRow(row, col);
+        matrix[row][col] = c;
         this.length++;
+        this.lastRow = row;
+        this.lastCol = col;
+    }
+
+    private void addBufferSpaceToRow(int row, int col){
+        char[] oldLine = matrix[row];
+        char[] newLine = new char[oldLine.length + 128]; // GETS MASSIVELY FASTER FOR LARGE LINES OF TEXT!
+        System.arraycopy(oldLine, 0, newLine, 0, col); // works fine
+        int current = col;
+        for(int i = newLine.length - (oldLine.length - col); i < newLine.length; i++){
+            newLine[i] = oldLine[current++];
+        }
+        this.matrix[row] = newLine;
     }
 
     public char removeCharacter(int row, int col){

@@ -344,7 +344,7 @@ public class TextSpeedTest {
         CharacterText characterText = new CharacterText(madnessText);
         double startNanos = System.nanoTime();
         for(int i = 0; i < 1000; i++){
-            characterText.insertCharacter(c, 0, 0);
+            characterText.insertCharacter(c, 0, i);
         }
         return System.nanoTime() - startNanos;
     }
@@ -366,7 +366,7 @@ public class TextSpeedTest {
         CharacterText characterText = new CharacterText(madnessText);
         double startNanos = System.nanoTime();
         for(int i = 0; i < 1000; i++){
-            characterText.insertCharacter(c, 999, 0);
+            characterText.insertCharacter(c, 999, i);
         }
         return System.nanoTime() - startNanos;
     }
