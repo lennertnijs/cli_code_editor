@@ -46,12 +46,7 @@ public final class ListText implements IText {
     public char[][] getContent() {
         char[][] matrix = new char[builders.size()][];
         for(int i = 0; i < builders.size(); i++){
-            StringBuilder builder = builders.get(i);
-            char[] line = new char[builder.length()];
-            for(int j = 0; j < builder.length(); j++){
-                line[j] = builder.charAt(j);
-            }
-            matrix[i] = line;
+            matrix[i] =  builders.get(i).substring(0, builders.get(i).length()).toCharArray();
         }
         return matrix;
     }

@@ -1,6 +1,5 @@
 package com.vip;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -8,7 +7,7 @@ public final class CharacterText implements IText{
 
 
     private char[][] matrix;
-    private final Pattern regex = Pattern.compile("\\r?\\n|\\r");
+    private final static Pattern regex = Pattern.compile("\\r?\\n|\\r");
     private int length;
     private final int[] offsets;
     private int lastRow = -1;
