@@ -12,6 +12,7 @@ public final class CharacterText implements IText{
     private final int[] offsets;
     private int lastRow = -1;
     private int lastCol = -1;
+    private int lastColNext = -1;
 
     public CharacterText(){
         this.matrix = new char[1][0];
@@ -143,20 +144,14 @@ public final class CharacterText implements IText{
         if(col < 0 || col > matrix[row].length){
             throw new IndexOutOfBoundsException("Column index is out of bounds.");
         }
-        if(col != matrix[row].length){
+        boolean notNewLineRemoved = col != matrix[row].length;
+        if(notNewLineRemoved){
             char c = matrix[row][col];
-            char[] oldLine = matrix[row];
-            int newLineLength = Math.max(oldLine.length - 1, 0);
-            char[] newLine = new char[newLineLength];
-            for(int i = 0; i < newLineLength; i++){
-                if(i < col){
-                    newLine[i] = oldLine[i];
-                }else{
-                    newLine[i] = oldLine[i + 1];
-                }
-            }
-            this.matrix[row] = newLine;
+            matrix[row][col] = '\u0000';
             this.length--;
+            this.lastRow = row;
+            this.lastCol = col;
+            this.lastColNext = col + 1;
             return c;
         }
         if(row == matrix.length - 1){
