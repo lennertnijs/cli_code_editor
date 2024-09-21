@@ -101,6 +101,21 @@ public final class ListText implements IText {
         if(column < 0 || column > builders.get(row).length()){
             throw new IndexOutOfBoundsException("Column index is out of bounds.");
         }
+        if(character == '\n' || character == '\r'){
+            StringBuilder before = new StringBuilder();
+            for(int i = 0; i < column; i++){
+                before.append(builders.get(row).charAt(i));
+            }
+            StringBuilder after = new StringBuilder();
+            for(int i = column; i < builders.get(row).length(); i++){
+                after.append(builders.get(row).charAt(i));
+            }
+            builders.remove(row);
+            builders.add(row, before);
+            builders.add(row + 1, after);
+            this.length++;
+            return;
+        }
         builders.get(row).insert(column, character);
         this.length++;
     }

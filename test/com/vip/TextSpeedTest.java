@@ -71,9 +71,14 @@ public class TextSpeedTest {
         System.out.println("Starting insertCharacter() test: ");
         System.out.println("First row: ");
         compareResults(testInsertCharacterListTextFIRSTLINE(), testInsertCharacterCharacterTextFIRSTLINE());
+
         System.out.println();
         System.out.println("Last row: ");
         compareResults(testInsertCharacterListTextLASTLINE(), testInsertCharacterCharacterTextLASTLINE());
+
+        System.out.println();
+        System.out.println("New line inserts: ");
+        compareResults(testInsertCharacterListTextNEWLINE(), testInsertCharacterCharacterTextNEWLINE());
         System.out.println("------------------------------");
 
         System.out.println("Starting getLineBetween() test: ");
@@ -81,7 +86,14 @@ public class TextSpeedTest {
         System.out.println("------------------------------");
 
         System.out.println("Starting removeCharacter() test: ");
+        System.out.println("Start of row: ");
         compareResults(testRemoveCharacterLineText(), testRemoveCharacterCharacterText());
+        System.out.println();
+        System.out.println("End of row: ");
+        compareResults(testRemoveCharacterListTextEND(), testRemoveCharacterCharacterTextEND());
+        System.out.println();
+        System.out.println("Newline: ");
+        compareResults(testRemoveCharacterListTextNEWLINE(), testRemoveCharacterCharacterTextNEWLINE());
         System.out.println("------------------------------");
 
 
@@ -349,6 +361,17 @@ public class TextSpeedTest {
         return System.nanoTime() - startNanos;
     }
 
+    public double testInsertCharacterListTextNEWLINE(){
+        char c = '\n';
+        String madnessText = getMadnessText();
+        ListText listText = new ListText(madnessText);
+        double startNanos = System.nanoTime();
+        for(int i = 0; i < 1000; i++){
+            listText.insertCharacter(c, i,0);
+        }
+        return System.nanoTime() - startNanos;
+    }
+
     public double testInsertCharacterListTextLASTLINE(){
         char c = 'p';
         String madnessText = getMadnessText();
@@ -365,8 +388,19 @@ public class TextSpeedTest {
         String madnessText = getMadnessText();
         CharacterText characterText = new CharacterText(madnessText);
         double startNanos = System.nanoTime();
-        for(int i = 0; i < 1000; i++){
+        for(int i = 0; i < 100; i++){
             characterText.insertCharacter(c, 999, i);
+        }
+        return System.nanoTime() - startNanos;
+    }
+
+    public double testInsertCharacterCharacterTextNEWLINE(){
+        char c = '\n';
+        String madnessText = getMadnessText();
+        CharacterText characterText = new CharacterText(madnessText);
+        double startNanos = System.nanoTime();
+        for(int i = 0; i < 100; i++){
+            characterText.insertCharacter(c, i, 0);
         }
         return System.nanoTime() - startNanos;
     }
@@ -421,6 +455,62 @@ public class TextSpeedTest {
         for(int i = 0; i < 1000; i++){
             XOR ^= characterText.removeCharacter(0, 0);
         }
+        if(XOR == 0){
+            System.out.println("IGNORE");
+        }
+        return System.nanoTime() - startNanos;
+    }
+
+    public double testRemoveCharacterListTextEND(){
+        String madnessText = getMadnessText();
+        ListText listText = new ListText(madnessText);
+        int XOR = 0;
+        double startNanos = System.nanoTime();
+        int length = listText.getLineLength(0);
+        for(int i = 0; i < 1000; i++){
+            XOR ^= listText.removeCharacter(0, length - i - 3);
+        }
+        if(XOR == 0){
+            System.out.println("IGNORE");
+        }
+        return System.nanoTime() - startNanos;
+    }
+
+    public double testRemoveCharacterCharacterTextEND(){
+        String madnessText = getMadnessText();
+        CharacterText characterText = new CharacterText(madnessText);
+        int XOR = 0;
+        double startNanos = System.nanoTime();
+        int length = characterText.getLineLength(0);
+        for(int i = 0; i < 1000; i++){
+            XOR ^= characterText.removeCharacter(0, length - i - 3);
+        }
+        if(XOR == 0){
+            System.out.println("IGNORE");
+        }
+        return System.nanoTime() - startNanos;
+    }
+
+    public double testRemoveCharacterListTextNEWLINE(){
+        String madnessText = getMadnessText();
+        ListText listText = new ListText(madnessText);
+        int XOR = 0;
+        double startNanos = System.nanoTime();
+        int length = listText.getLineLength(0);
+        XOR ^= listText.removeCharacter(0, length);
+        if(XOR == 0){
+            System.out.println("IGNORE");
+        }
+        return System.nanoTime() - startNanos;
+    }
+
+    public double testRemoveCharacterCharacterTextNEWLINE(){
+        String madnessText = getMadnessText();
+        CharacterText characterText = new CharacterText(madnessText);
+        int XOR = 0;
+        double startNanos = System.nanoTime();
+        int length = characterText.getLineLength(0);
+        XOR ^= characterText.removeCharacter(0, length);
         if(XOR == 0){
             System.out.println("IGNORE");
         }

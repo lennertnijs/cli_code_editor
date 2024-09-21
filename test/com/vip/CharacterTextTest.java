@@ -11,7 +11,7 @@ public class CharacterTextTest {
     @Test
     public void testConstructorWithNull(){
         assertThrows(NullPointerException.class,
-                () -> new CharacterText((String) null));
+                () -> new CharacterText(null));
     }
 
     @Test
@@ -165,7 +165,10 @@ public class CharacterTextTest {
         char[] line =
                 {'T', 'h', 'i', '6', 's', ' ', 'i', 's', ' ','a', ' ',
                         'd', 'u', 'm', 'm', 'y', ' ', 't', 'e', 'x', 't'};
+        assertEquals(34 + 1, text.getLength());
+        assertEquals(21, text.getLineLength(0));
         assertArrayEquals(line, text.getLine(0));
+
     }
 
     @Test
@@ -174,6 +177,8 @@ public class CharacterTextTest {
         text.insertCharacter('6', 0, 0);
         char[] line0 = {'6', 'T', 'h', 'i', 's', ' ', 'i', 's', ' ','a', ' ',
                 'd', 'u', 'm', 'm', 'y', ' ', 't', 'e', 'x', 't'};
+        assertEquals(34 + 1, text.getLength());
+        assertEquals(21, text.getLineLength(0));
         assertArrayEquals(line0, text.getLine(0));
     }
 
@@ -182,6 +187,8 @@ public class CharacterTextTest {
         CharacterText text = new CharacterText("This is a dummy text\nNo other use.");
         text.insertCharacter('6', 1, 0);
         char[] line1 = {'6', 'N', 'o', ' ', 'o', 't', 'h', 'e', 'r', ' ', 'u', 's', 'e', '.'};
+        assertEquals(34 + 1, text.getLength());
+        assertEquals(14, text.getLineLength(1));
         assertArrayEquals(line1, text.getLine(1));
     }
 
@@ -191,6 +198,8 @@ public class CharacterTextTest {
         text.insertCharacter('6', 0, 20);
         char[] line0 = {'T', 'h', 'i', 's', ' ', 'i', 's', ' ','a', ' ',
                 'd', 'u', 'm', 'm', 'y', ' ', 't', 'e', 'x', 't', '6'};
+        assertEquals(34 + 1, text.getLength());
+        assertEquals(21, text.getLineLength(0));
         assertArrayEquals(line0, text.getLine(0));
     }
 
@@ -199,7 +208,44 @@ public class CharacterTextTest {
         CharacterText text = new CharacterText("This is a dummy text\nNo other use.");
         text.insertCharacter('6', 1, 13);
         char[] line1 = {'N', 'o', ' ', 'o', 't', 'h', 'e', 'r', ' ', 'u', 's', 'e', '.', '6'};
+        assertEquals(34 + 1, text.getLength());
+        assertEquals(14, text.getLineLength(1));
         assertArrayEquals(line1, text.getLine(1));
+    }
+
+    @Test
+    public void testInsertCharacterNewLine(){
+        CharacterText text = new CharacterText("This is a dummy text\nNo other use.");
+        text.insertCharacter('\n', 0, 3);
+        char[] line0 = {'T', 'h', 'i'};
+        char[] line1 = {'s', ' ', 'i', 's', ' ','a', ' ', 'd', 'u', 'm', 'm', 'y', ' ', 't', 'e', 'x', 't'};
+        assertEquals(3, text.getLineCount());
+        assertEquals(34 + 1, text.getLength());
+        assertEquals(3, text.getLineLength(0));
+        assertEquals(17, text.getLineLength(1));
+        assertArrayEquals(line0, text.getLine(0));
+        assertArrayEquals(line1, text.getLine(1));
+    }
+
+    @Test
+    public void testInsertCharacterMultipleNewLines(){
+        CharacterText text = new CharacterText("This is a dummy text\nNo other use.");
+        text.insertCharacter('\n', 0, 3);
+        text.insertCharacter('\n', 0, 0);
+        text.insertCharacter('\n', 2, 2);
+        text.insertCharacter('p', 4, 1);
+        char[] line0 = {};
+        char[] line1 = {'T', 'h', 'i'};
+        char[] line2 = {'s', ' '};
+        char[] line3 = {'i', 's', ' ','a', ' ', 'd', 'u', 'm', 'm', 'y', ' ', 't', 'e', 'x', 't'};
+        char[] line4 = {'N', 'p', 'o', ' ', 'o', 't', 'h', 'e', 'r', ' ', 'u', 's', 'e', '.'};
+        assertEquals(5, text.getLineCount());
+        assertEquals(34 + 4, text.getLength());
+        assertArrayEquals(line0, text.getLine(0));
+        assertArrayEquals(line1, text.getLine(1));
+        assertArrayEquals(line2, text.getLine(2));
+        assertArrayEquals(line3, text.getLine(3));
+        assertArrayEquals(line4, text.getLine(4));
     }
 
     @Test
@@ -284,6 +330,17 @@ public class CharacterTextTest {
         assertEquals('\n', removed);
         assertArrayEquals(line, text.getLine(0));
         assertEquals(1, text.getLineCount());
+    }
+
+    @Test
+    public void testRemoveMultipleAdjacentCharacters(){
+        CharacterText text = new CharacterText("This is a dummy text\nNo other use.");
+        char[] line = {' ', 't', 'e', 'x', 't'};
+        for(int i = 0; i < 15; i++){
+            text.removeCharacter(0, 0);
+        }
+        assertEquals(5, text.getLineLength(0));
+        assertArrayEquals(line, text.getLine(0));
     }
 
     @Test

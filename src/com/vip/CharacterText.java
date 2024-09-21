@@ -9,28 +9,24 @@ public final class CharacterText implements IText{
     private char[][] matrix;
     private final static Pattern regex = Pattern.compile("\\r?\\n|\\r");
     private int length;
-    private final int[] offsets;
     private int lastRow = -1;
     private int lastCol = -1;
     private int lastColNext = -1;
 
     public CharacterText(){
         this.matrix = new char[1][0];
-        this.offsets = new int[1];
     }
 
     public CharacterText(String text){
         String[] lines = regex.split(text);
         this.length = 0;
         this.matrix = new char[lines.length][];
-        this.offsets = new int[lines.length];
         for(int i = 0; i < lines.length; i++){
             this.matrix[i] = new char[lines[i].length()];
             for(int j = 0; j < lines[i].length(); j++){
                 this.matrix[i][j] = lines[i].charAt(j);
             }
             this.length += lines[i].length() + 1;
-            this.offsets[i] = lines[i].length();
         }
         this.length = Math.max(this.length - 1, 0);
     }
@@ -56,7 +52,16 @@ public final class CharacterText implements IText{
         if(row < 0 || row >= matrix.length){
             throw new IndexOutOfBoundsException("Row index is out of bounds.");
         }
-        return matrix[row].length;
+        if(row != lastRow){
+            return matrix[row].length;
+        }
+        int count = 0;
+        for(char c : matrix[row]){
+            if(c != '\u0000'){
+                count++;
+            }
+        }
+        return count;
     }
 
     public char[] getLine(int row){
@@ -66,14 +71,7 @@ public final class CharacterText implements IText{
         if(row != lastRow){
             return matrix[row];
         }
-        int count = 0;
-        for(char c : matrix[row]){
-            if(c != '\u0000'){
-                count++;
-            }
-        }
-
-        char[] subArray = new char[count];
+        char[] subArray = new char[getLineLength(row)];
         int i = 0;
         for(char c : matrix[row]){
             if(c != '\u0000'){
@@ -110,6 +108,14 @@ public final class CharacterText implements IText{
         if(col < 0 || col > matrix[row].length){
             throw new IndexOutOfBoundsException("Column index is out of bounds.");
         }
+        if(row != lastRow && lastRow >= 0){
+            cleanUpLineBuffer();
+        }
+        if(c == '\n' || c == '\r'){
+            insertNewLine(row, col);
+            this.length++;
+            return;
+        }
         if(lastRow == row && lastCol == col - 1){
             if (matrix[row][col] != '\u0000') {
                 addBufferSpaceToRow(row, col);
@@ -124,6 +130,25 @@ public final class CharacterText implements IText{
         this.length++;
         this.lastRow = row;
         this.lastCol = col;
+    }
+
+    private void insertNewLine(int row, int col){
+        char[][] newMatrix = new char[matrix.length + 1][];
+        for(int i = 0; i < matrix.length; i++){
+            if(i < row){
+                newMatrix[i] = matrix[i];
+                continue;
+            }
+            if(i == row){
+                newMatrix[i] = new char[col];
+                newMatrix[i + 1] = new char[matrix[i].length - col];
+                System.arraycopy(matrix[i], 0, newMatrix[i], 0, col);
+                System.arraycopy(matrix[i], col, newMatrix[i + 1], 0, matrix[i].length - col);
+                continue;
+            }
+            newMatrix[i + 1] = matrix[i];
+        }
+        this.matrix = newMatrix;
     }
 
     private void addBufferSpaceToRow(int row, int col){
@@ -144,37 +169,72 @@ public final class CharacterText implements IText{
         if(col < 0 || col > matrix[row].length){
             throw new IndexOutOfBoundsException("Column index is out of bounds.");
         }
-        boolean notNewLineRemoved = col != matrix[row].length;
-        if(notNewLineRemoved){
-            char c = matrix[row][col];
-            matrix[row][col] = '\u0000';
-            this.length--;
-            this.lastRow = row;
-            this.lastCol = col;
-            this.lastColNext = col + 1;
-            return c;
+        if(row != lastRow && lastRow >= 0){
+            cleanUpLineBuffer();
         }
-        if(row == matrix.length - 1){
+        boolean newLineRemoved = col == matrix[row].length;
+        if(newLineRemoved){
+            removeNewLine(row);
+            return '\n';
+        }
+        if(row == lastRow){
+            if(col == lastCol - 1){
+                char c = matrix[row][col];
+                matrix[row][col] = '\u0000';
+                this.length--;
+                this.lastCol--;
+                return c;
+            }
+            if(col == lastCol){
+                char c = matrix[row][lastColNext];
+                matrix[row][lastColNext] = '\u0000';
+                this.length--;
+                this.lastColNext++;
+                return c;
+            }
+        }
+        // reset buffer!
+        char c = matrix[row][col];
+        matrix[row][col] = '\u0000';
+        this.length--;
+        this.lastRow = row;
+        this.lastCol = col;
+        this.lastColNext = col + 1;
+        return c;
+    }
+
+    private void cleanUpLineBuffer(){
+        matrix[lastRow] = getLine(lastRow);
+    }
+
+    private void removeNewLine(int row){
+        boolean lastRow = row == matrix.length - 1;
+        if(lastRow){
             throw new IndexOutOfBoundsException("Cannot remove a line break from the final line.");
         }
         char[][] newMatrix = new char[matrix.length - 1][];
         for(int i = 0; i < matrix.length; i++){
             char[] line = matrix[i];
-            if(i != row){
+            if(i < row){
                 newMatrix[i] = line;
                 continue;
             }
-            int length = line.length + matrix[row + 1].length;
-            char[] newLine = new char[length];
-            System.arraycopy(line, 0, newLine, 0, line.length);
-            System.arraycopy(matrix[row + 1], 0, newLine, line.length, length - line.length);
-            newMatrix[i] = newLine;
-            i++;
+            if(i == row){
+                int length = line.length + matrix[row + 1].length;
+                char[] newLine = new char[length];
+                System.arraycopy(line, 0, newLine, 0, line.length);
+                System.arraycopy(matrix[row + 1], 0, newLine, line.length, length - line.length);
+                newMatrix[i] = newLine;
+                i++;
+                continue;
+            }
+            newMatrix[i - 1] = matrix[i];
         }
         this.length--;
         this.matrix = newMatrix;
-        return '\n';
     }
+
+
     public int countOccurrences(char[] sequence){
         Objects.requireNonNull(sequence, "Character sequence is null.");
         if(sequence.length > getLength()){

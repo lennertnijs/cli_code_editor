@@ -201,6 +201,41 @@ public class ListTextTest {
     }
 
     @Test
+    public void testInsertCharacterNewLine(){
+        ListText text = new ListText("This is a dummy text\nNo other use.");
+        text.insertCharacter('\n', 0, 3);
+        char[] line0 = {'T', 'h', 'i'};
+        char[] line1 = {'s', ' ', 'i', 's', ' ','a', ' ', 'd', 'u', 'm', 'm', 'y', ' ', 't', 'e', 'x', 't'};
+        assertEquals(3, text.getLineCount());
+        assertEquals(34 + 1, text.getLength());
+        assertEquals(3, text.getLineLength(0));
+        assertEquals(17, text.getLineLength(1));
+        assertArrayEquals(line0, text.getLine(0));
+        assertArrayEquals(line1, text.getLine(1));
+    }
+
+    @Test
+    public void testInsertCharacterMultipleNewLines(){
+        ListText text = new ListText("This is a dummy text\nNo other use.");
+        text.insertCharacter('\n', 0, 3);
+        text.insertCharacter('\n', 0, 0);
+        text.insertCharacter('\n', 2, 2);
+        text.insertCharacter('p', 4, 1);
+        char[] line0 = {};
+        char[] line1 = {'T', 'h', 'i'};
+        char[] line2 = {'s', ' '};
+        char[] line3 = {'i', 's', ' ','a', ' ', 'd', 'u', 'm', 'm', 'y', ' ', 't', 'e', 'x', 't'};
+        char[] line4 = {'N', 'p', 'o', ' ', 'o', 't', 'h', 'e', 'r', ' ', 'u', 's', 'e', '.'};
+        assertEquals(5, text.getLineCount());
+        assertEquals(34 + 4, text.getLength());
+        assertArrayEquals(line0, text.getLine(0));
+        assertArrayEquals(line1, text.getLine(1));
+        assertArrayEquals(line2, text.getLine(2));
+        assertArrayEquals(line3, text.getLine(3));
+        assertArrayEquals(line4, text.getLine(4));
+    }
+
+    @Test
     public void testInsertCharacterWithNegativeRow(){
         ListText text = new ListText("This is a dummy text\nNo other use.");
         assertThrows(IndexOutOfBoundsException.class, () -> text.insertCharacter('6', -1, 3));
